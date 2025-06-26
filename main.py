@@ -111,3 +111,107 @@ def add_zaduzenje():
         return redirect('/zaduzenja')
     conn.close()
     return render_template('add_zaduzenje.html', koops=koops)
+
+
+@app.route('/lager')
+def lager():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT id, naziv FROM kooperanti")
+    koops = c.fetchall()
+    c.execute("SELECT DISTINCT roba FROM odvage")
+    robe = [r[0] for r in c.fetchall()]
+    lager_data = []
+    for k_id, k_name in koops:
+        for r in robe:
+            c.execute("SELECT SUM(neto) FROM odvage WHERE tip='Ulaz' AND kooperant_id=? AND roba=?", (k_id, r))
+            ulaz = c.fetchone()[0] or 0
+            c.execute("SELECT SUM(neto) FROM odvage WHERE tip='Izlaz' AND kooperant_id=? AND roba=?", (k_id, r))
+            izlaz = c.fetchone()[0] or 0
+            c.execute("SELECT SUM(kolicina) FROM zaduzenja WHERE kooperant_id=? AND roba=?", (k_id, r))
+            zaduzenje = c.fetchone()[0] or 0
+            stanje = ulaz - izlaz - zaduzenje
+            if ulaz or izlaz or zaduzenje:
+                lager_data.append((k_name, r, ulaz, izlaz, zaduzenje, stanje))
+    conn.close()
+    return render_template('lager.html', lager=lager_data)
+
+@app.route('/kartica/<int:kooperant_id>')
+def kartica(kooperant_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT naziv FROM kooperanti WHERE id=?", (kooperant_id,))
+    kooperant = c.fetchone()[0]
+    redovi = []
+
+    c.execute("SELECT datum, 'Ulaz', roba, neto FROM odvage WHERE tip='Ulaz' AND kooperant_id=?", (kooperant_id,))
+    redovi += c.fetchall()
+    c.execute("SELECT datum, 'Izlaz', roba, neto FROM odvage WHERE tip='Izlaz' AND kooperant_id=?", (kooperant_id,))
+    redovi += c.fetchall()
+    c.execute("SELECT datum, 'Zaduženje', roba, kolicina FROM zaduzenja WHERE kooperant_id=?", (kooperant_id,))
+    redovi += c.fetchall()
+
+    redovi.sort(key=lambda x: x[0])  # Sort by datum
+    conn.close()
+    return render_template('kartica.html', redovi=redovi, kooperant=kooperant)
+
+
+from flask import session, url_for
+
+app.secret_key = 'tajna_lozinka_zadruga123'
+
+# Login dummy user data
+users = {'admin': 'admin123', 'magacioner': 'mag123'}
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        u = request.form['username']
+        p = request.form['password']
+        if u in users and users[u] == p:
+            session['user'] = u
+            return redirect('/')
+        return "Neispravni podaci"
+    return render_template('login.html')
+
+@app.before_request
+def require_login():
+    allowed = ['login', 'static']
+    if 'user' not in session and not any(x in request.path for x in allowed):
+        return redirect('/login')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/login')
+
+@app.route('/izvestaji')
+def izvestaji():
+    return render_template('izvestaji.html')
+
+
+import pandas as pd
+from flask import send_file
+import io
+
+@app.route('/export/odvage.xlsx')
+def export_odvage():
+    conn = sqlite3.connect('database.db')
+    df = pd.read_sql_query('''
+        SELECT datum, tip, (SELECT naziv FROM kooperanti WHERE id = kooperant_id) AS kooperant,
+               roba, vozilo, vozac, bruto, tara, neto, napomena
+        FROM odvage
+    ''', conn)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Odvage')
+    output.seek(0)
+    return send_file(output, download_name='odvage.xlsx', as_attachment=True)
+
+
+@app.route('/srps', methods=['GET', 'POST'])
+def srps():
+    if request.method == 'POST':
+        # Ovde bi se snimali parametri u bazu
+        return "SRPS norme sačuvane (demo)"
+    return render_template('srps.html')

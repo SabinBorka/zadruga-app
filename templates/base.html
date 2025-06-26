@@ -9,6 +9,15 @@
   <nav>
     <a href="/kooperanti">Kooperanti</a>
     <a href="/odvage">Odvage</a>
+    <a href="/zaduzenja">Zaduženja</a>
+    <a href="/lager">Lager</a>
+    <a href="/kartica/1">Kartica</a>
+    <a href="/izvestaji">Izveštaji</a>
+    <a href="/srps">SRPS</a>
+    <a href="/export/odvage.xlsx">📥 Izvoz (Excel)</a>
+    {% if session.get('user') %}
+    <span style="float:right">Prijavljen: {{ session.get('user') }} | <a href="/logout">Odjava</a></span>
+    {% endif %}
   </nav>
   <hr>
   {% block content %}{% endblock %}

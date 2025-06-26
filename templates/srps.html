@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>SRPS Kvalitet - Podesavanje</h2>
+<form method="POST">
+  Vlažnost max (%): <input name="vlaga" type="number" step="0.1"><br>
+  Primesa max (%): <input name="primesa" type="number" step="0.1"><br>
+  Hektolitar min: <input name="hektolitar" type="number" step="0.1"><br>
+  <button type="submit">Sačuvaj</button>
+</form>
+{% endblock %}

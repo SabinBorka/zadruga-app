@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Kartica partnera - {{ kooperant }}</h2>
+<table>
+  <tr><th>Datum</th><th>Tip</th><th>Roba</th><th>Količina</th></tr>
+  {% for r in redovi %}
+  <tr>
+    <td>{{ r[0] }}</td>
+    <td>{{ r[1] }}</td>
+    <td>{{ r[2] }}</td>
+    <td>{{ r[3] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

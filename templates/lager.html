@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Lager - Zbirno stanje robe po kooperantima</h2>
+<table>
+  <tr><th>Kooperant</th><th>Roba</th><th>Ulaz</th><th>Izlaz</th><th>Zaduženje</th><th>Stanje</th></tr>
+  {% for l in lager %}
+  <tr>
+    <td>{{ l[0] }}</td>
+    <td>{{ l[1] }}</td>
+    <td>{{ l[2] }}</td>
+    <td>{{ l[3] }}</td>
+    <td>{{ l[4] }}</td>
+    <td>{{ l[5] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
