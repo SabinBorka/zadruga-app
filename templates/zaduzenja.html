@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Zaduženja</h2>
+<table>
+  <tr><th>Kooperant</th><th>Roba</th><th>Količina</th><th>Datum</th></tr>
+  {% for z in zaduzenja %}
+  <tr>
+    <td>{{ z[1] }}</td>
+    <td>{{ z[2] }}</td>
+    <td>{{ z[3] }}</td>
+    <td>{{ z[4] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<a href="/zaduzenja/add">Dodaj zaduženje</a>
+{% endblock %}

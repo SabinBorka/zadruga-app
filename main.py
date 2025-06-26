@@ -74,3 +74,40 @@ def add_odvaga():
 if __name__ == '__main__':
     init_db()
     app.run(host='0.0.0.0', port=3000, debug=True)
+
+
+@app.route('/zaduzenja')
+def zaduzenja():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS zaduzenja (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kooperant_id INTEGER,
+        roba TEXT,
+        kolicina REAL,
+        datum TEXT,
+        FOREIGN KEY(kooperant_id) REFERENCES kooperanti(id)
+    )''')
+    c.execute('''SELECT z.id, k.naziv, z.roba, z.kolicina, z.datum
+                 FROM zaduzenja z LEFT JOIN kooperanti k ON z.kooperant_id = k.id
+                 ORDER BY z.datum DESC''')
+    data = c.fetchall()
+    conn.close()
+    return render_template('zaduzenja.html', zaduzenja=data)
+
+@app.route('/zaduzenja/add', methods=['GET', 'POST'])
+def add_zaduzenje():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT id, naziv FROM kooperanti")
+    koops = c.fetchall()
+    if request.method == 'POST':
+        d = request.form
+        c.execute('''INSERT INTO zaduzenja (kooperant_id, roba, kolicina, datum)
+                     VALUES (?, ?, ?, ?)''',
+                  (d['kooperant'], d['roba'], float(d['kolicina']), d['datum']))
+        conn.commit()
+        conn.close()
+        return redirect('/zaduzenja')
+    conn.close()
+    return render_template('add_zaduzenje.html', koops=koops)

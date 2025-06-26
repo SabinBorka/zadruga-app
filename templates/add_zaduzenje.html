@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dodaj zaduženje</h2>
+<form method="POST">
+  Kooperant: 
+  <select name="kooperant">
+    {% for k in koops %}
+    <option value="{{ k[0] }}">{{ k[1] }}</option>
+    {% endfor %}
+  </select><br>
+  Roba: <input name="roba"><br>
+  Količina: <input name="kolicina" type="number" step="0.01"><br>
+  Datum: <input name="datum" type="date"><br>
+  <button type="submit">Sačuvaj</button>
+</form>
+{% endblock %}
