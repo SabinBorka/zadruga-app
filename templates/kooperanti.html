@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Kooperanti</h2>
+<form method="POST">
+  Novi kooperant: <input name="naziv"><button type="submit">Dodaj</button>
+</form>
+<ul>
+{% for k in kooperanti %}
+  <li>{{ k[1] }}</li>
+{% endfor %}
+</ul>
+{% endblock %}

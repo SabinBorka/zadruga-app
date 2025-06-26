@@ -1,0 +1,5 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; border: 1px solid #ccc; }
+th { background: #f0f0f0; }
+nav a { margin-right: 15px; }

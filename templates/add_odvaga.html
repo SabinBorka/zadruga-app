@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dodaj odvagu</h2>
+<form method="POST">
+  Datum: <input name="datum" type="date" required><br>
+  Tip: <select name="tip"><option>Ulaz</option><option>Izlaz</option></select><br>
+  Kooperant: 
+  <select name="kooperant">
+    {% for k in koops %}
+    <option value="{{ k[0] }}">{{ k[1] }}</option>
+    {% endfor %}
+  </select><br>
+  Roba: <input name="roba"><br>
+  Vozilo: <input name="vozilo"><br>
+  Vozač: <input name="vozac"><br>
+  Bruto: <input name="bruto" type="number" step="0.01"><br>
+  Tara: <input name="tara" type="number" step="0.01"><br>
+  Napomena: <input name="napomena"><br>
+  <button type="submit">Sačuvaj</button>
+</form>
+{% endblock %}
