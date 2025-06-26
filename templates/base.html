@@ -9,7 +9,9 @@
   <nav>
     <a href="/kooperanti">Kooperanti</a>
     <a href="/odvage">Odvage</a>
+    {% if session.get('role') in ['admin', 'komercijalista'] %}
     <a href="/zaduzenja">Zaduženja</a>
+    {% endif %}
     <a href="/lager">Lager</a>
     <a href="/kartica/1">Kartica</a>
     <a href="/izvestaji">Izveštaji</a>

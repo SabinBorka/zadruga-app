@@ -215,3 +215,64 @@ def srps():
         # Ovde bi se snimali parametri u bazu
         return "SRPS norme sačuvane (demo)"
     return render_template('srps.html')
+
+
+# Nadogradnja korisnika sa rolama
+users = {
+    'admin': {'password': 'admin123', 'role': 'admin'},
+    'magacioner': {'password': 'mag123', 'role': 'magacioner'},
+    'komercijalista': {'password': 'kom123', 'role': 'komercijalista'}
+}
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        u = request.form['username']
+        p = request.form['password']
+        if u in users and users[u]['password'] == p:
+            session['user'] = u
+            session['role'] = users[u]['role']
+            return redirect('/')
+        return "Neispravni podaci"
+    return render_template('login.html')
+
+# Provera po roli (primeri):
+@app.route('/zaduzenja')
+def zaduzenja():
+    if session.get('role') not in ['admin', 'komercijalista']:
+        return "Pristup odbijen", 403
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS zaduzenja (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kooperant_id INTEGER,
+        roba TEXT,
+        kolicina REAL,
+        datum TEXT,
+        FOREIGN KEY(kooperant_id) REFERENCES kooperanti(id)
+    )''')
+    c.execute('''SELECT z.id, k.naziv, z.roba, z.kolicina, z.datum
+                 FROM zaduzenja z LEFT JOIN kooperanti k ON z.kooperant_id = k.id
+                 ORDER BY z.datum DESC''')
+    data = c.fetchall()
+    conn.close()
+    return render_template('zaduzenja.html', zaduzenja=data)
+
+@app.route('/zaduzenja/add', methods=['GET', 'POST'])
+def add_zaduzenje():
+    if session.get('role') not in ['admin', 'komercijalista']:
+        return "Pristup odbijen", 403
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT id, naziv FROM kooperanti")
+    koops = c.fetchall()
+    if request.method == 'POST':
+        d = request.form
+        c.execute('''INSERT INTO zaduzenja (kooperant_id, roba, kolicina, datum)
+                     VALUES (?, ?, ?, ?)''',
+                  (d['kooperant'], d['roba'], float(d['kolicina']), d['datum']))
+        conn.commit()
+        conn.close()
+        return redirect('/zaduzenja')
+    conn.close()
+    return render_template('add_zaduzenje.html', koops=koops)
